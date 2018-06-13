@@ -8,7 +8,7 @@
 
 import UIKit
 
-@IBDesignable class FloatCardView: UIView {
+public class FloatCardView: UIView {
     
     @IBOutlet private weak var footerView: UIView!
     @IBOutlet private weak var thumbImageView: UIImageView!
@@ -22,11 +22,12 @@ import UIKit
     private var view: UIView!
     private var frontImage: UIImage!
     
+    private var defaultFooterHeight: CGFloat = 100
     private var topCornerRadius : CGFloat = 10
     private var bottomCornerRadius : CGFloat = 10
     private var maskLayer: CAShapeLayer!
     private var isFlipped: Bool = false
-    
+    private var gradient: CAGradientLayer!
     public var bottomRadius: CGFloat  {
         set(radius) {
             bottomCornerRadius = radius
@@ -73,41 +74,46 @@ import UIKit
         super.init(frame: frame)
         xibSetup()
         roundCorners(topRadius: topCornerRadius, bottomRadius: bottomCornerRadius)
-        setProfileImageView()
+        self.footerViewHeight = defaultFooterHeight
         createShadows()
-      
+        setup()
     }
     
     public required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
         xibSetup()
         roundCorners(topRadius: topCornerRadius, bottomRadius: bottomCornerRadius)
-        setProfileImageView()
+        self.footerViewHeight = defaultFooterHeight
         createShadows()
-        
+        setup()
         
     }
     
+    private func setup() {
+        
+        self.autoresizesSubviews = false
+        
+    }
     
     private func xibSetup() {
         view = loadViewFromNib()
 
         view.frame = bounds
         
-        view.autoresizingMask = [UIViewAutoresizing.flexibleWidth, UIViewAutoresizing.flexibleHeight]
+        view.autoresizingMask = [.flexibleWidth, .flexibleHeight]
 
         addSubview(view)
+        
     }
     
     private func loadViewFromNib() -> UIView {
         let bundle = Bundle(for: type(of:self))
-        let nib = UINib(nibName: "CardView", bundle: bundle)
+        let nib = UINib(nibName: "FloatCardView", bundle: bundle)
         
         let view = nib.instantiate(withOwner: self, options: nil)[0] as! UIView
+        
         return view
     }
-    
-    
     
     private func roundCorners(topRadius: CGFloat, bottomRadius: CGFloat) {
         
@@ -224,7 +230,7 @@ import UIKit
     
     public func setGradientForFooterView(leftColor: UIColor, rightColor: UIColor,startPoint:CGPoint,endPoint:CGPoint) {
         
-        let gradient = CAGradientLayer()
+        gradient = CAGradientLayer()
         gradient.frame = self.footerView.bounds
         gradient.colors = [leftColor.cgColor, rightColor.cgColor]
         gradient.startPoint = startPoint
@@ -235,9 +241,11 @@ import UIKit
     
     public func setSimpleBackgroundColorForFooterView(color: UIColor) {
         
-        if let layer = self.footerView.layer.sublayers?[0] {
-            layer.removeFromSuperlayer()
-            
+        
+        for layer in self.footerView.layer.sublayers! {
+            if layer == gradient {
+                layer.removeFromSuperlayer()
+            }
         }
         
         self.footerView.backgroundColor = color
